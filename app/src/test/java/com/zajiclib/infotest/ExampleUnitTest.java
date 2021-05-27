@@ -1,4 +1,4 @@
-package kt.kaprion.infotest;
+package com.zajiclib.infotest;
 
 import org.junit.Test;
 

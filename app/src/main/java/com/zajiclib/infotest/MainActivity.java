@@ -1,4 +1,4 @@
-package kt.kaprion.infotest;
+package com.zajiclib.infotest;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;

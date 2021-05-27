@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "kt.kaprion.infotest"
+        applicationId "com.zajiclib.infotest"
         minSdkVersion 28
         targetSdkVersion 30
         versionCode 1
