@@ -102,19 +102,10 @@ public class HelpScreen implements View.OnClickListener {
             // arrow params
             RelativeLayout.LayoutParams paramsIvArrow = new RelativeLayout.LayoutParams((int) (viewWidth), (int) (viewHeight));
 
-            // calculating center coords for the view
-//            int centerX, centerY;
-//            centerX = (int) (view.getX() + (viewWidth / 2));
-//            centerY = (int) (view.getY() + (viewHeight / 2));
-//
-//            int absolutePositionX = centerX - (int) ((viewWidth * ADJUST_RATIO) / 2 );
-//            int absolutePositionY = centerY - (int) ((viewHeight * ADJUST_RATIO) / 2);
-
             paramsIvArrow.leftMargin = (int) (absolutePositionX - viewWidth);
             paramsIvArrow.topMargin = (int) (absolutePositionY + (viewHeight / 2));
 
             helpLayout.addView(ivArrow, paramsIvArrow);
-
 
             // textview params
             RelativeLayout.LayoutParams paramsForTextV = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -127,9 +118,7 @@ public class HelpScreen implements View.OnClickListener {
 
             helpLayout.addView(tvHelp, paramsForTextV);
 
-
         }
-
         helpLayout.setVisibility(View.VISIBLE);
 
     }
