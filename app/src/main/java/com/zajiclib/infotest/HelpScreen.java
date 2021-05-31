@@ -168,7 +168,7 @@ public class HelpScreen implements View.OnClickListener {
             paramsArrow.topMargin = computeTopMargin(currentViewToAnnotate, iv);
 
             helpLayout.addView(iv, paramsArrow);
-            
+
         }
     }
 
