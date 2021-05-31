@@ -2,9 +2,11 @@ package com.zajiclib.infotest;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,6 +35,10 @@ public class HelpScreen implements View.OnClickListener {
         this.viewsToShowHelp = new ArrayList<>();
         this.helpMessages = new ArrayList<>();
         this.helpLayout.setOnClickListener(this);
+        Point screenSizePoint = new Point();
+        ((MainActivity) context).getWindowManager().getDefaultDisplay().getSize(screenSizePoint);
+        this.displayWidth = screenSizePoint.x;
+        this.displayHeight = screenSizePoint.y;
         this.currentlyDisplayedIndex = 0;
         this.helpLayout.setFocusable(View.FOCUSABLE);
         this.helpLayout.setClickable(true);
@@ -118,11 +124,115 @@ public class HelpScreen implements View.OnClickListener {
             helpLayout.addView(tvHelp, paramsForTextV);
 
         }
-        helpLayout.setVisibility(View.VISIBLE);
 
+        helpLayout.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Method for displaying help in appropriate form
+     */
+    public void displayHelp() {
+        for (int i = 0; i < viewsToShowHelp.size(); i++) {
 
+            View currentViewToAnnotate = viewsToShowHelp.get(i);
+            boolean isRight = isInRightHalf(currentViewToAnnotate);
+            boolean isBottom = isOnBottomSide(currentViewToAnnotate);
+            boolean isMiddle = isInMiddle(currentViewToAnnotate);
+
+            ImageView iv = new ImageView(context);
+            iv.requestLayout();
+            TextView tv = new TextView(context);
+            tv.setTextColor(Color.WHITE);
+            tv.setText(helpMessages.get(i));
+            tv.requestLayout();
+            Drawable drawable;
+            if (isMiddle) {
+                drawable = ContextCompat.getDrawable(context, R.drawable.arrow_down);
+            } else {
+                drawable = ContextCompat.getDrawable(context, R.drawable.arrow_custom);
+            }
+
+            iv.setImageDrawable(drawable);
+
+            // flip horizontally
+            if (!isRight) iv.setScaleX(-1.0f);
+
+            // flip vertically
+            if (!isBottom) iv.setScaleY(-1.0f);
+
+
+            // arrow params
+            RelativeLayout.LayoutParams paramsArrow = new RelativeLayout.LayoutParams((int) (currentViewToAnnotate.getWidth() * ADJUST_RATIO), (int) (currentViewToAnnotate.getHeight() * ADJUST_RATIO));
+
+            paramsArrow.leftMargin = computeLeftMargin(currentViewToAnnotate, iv);
+            paramsArrow.topMargin = computeTopMargin(currentViewToAnnotate, iv);
+
+            helpLayout.addView(iv, paramsArrow);
+            
+        }
+    }
+
+    /**
+     * Decides if the view is located on the right half or not
+     */
+    public boolean isInRightHalf(@NonNull View view) {
+        int centerX = (int) view.getX() + view.getWidth() / 2;
+
+        return centerX >= displayWidth;
+    }
+
+    /**
+     * Checks whether is the view right in the middle or not (because of the different drawable used)
+     */
+    public boolean isInMiddle(@NonNull View view) {
+        int centerX = (int) view.getX() + view.getWidth() / 2;
+
+        return centerX == displayWidth / 2;
+    }
+
+    /**
+     * Checks whether is the view on the bottom (half) side of the screen
+     */
+    public boolean isOnBottomSide(@NonNull View view) {
+        int centerY = (int) view.getY() + view.getWidth() / 2;
+
+        return centerY >= displayHeight / 2;
+    }
+
+    /**
+     * Computes left margin for the arrow
+     */
+    public int computeLeftMargin(View view, ImageView iv) {
+        boolean isRight = isInRightHalf(view);
+        boolean isMiddle = isInMiddle(view);
+
+        if (isMiddle) {
+            return (int) view.getX() + view.getWidth() / 2;
+        }
+
+        if (isRight) {
+            return (int) view.getX();
+        }
+
+        return (int) view.getX() + view.getWidth();
+    }
+
+    /**
+     * Computes top margin for the arrow
+     */
+    public int computeTopMargin(View view, ImageView imageView) {
+        boolean isBottom = isOnBottomSide(view);
+
+        if (isBottom) {
+            return (int) view.getX() - imageView.getHeight();
+        }
+
+        return (int) view.getX() + view.getHeight();
+    }
+
+    /**
+     * Default on click event
+     */
     @Override
     public void onClick(View v) {
 //        displayCurrentHelp();
