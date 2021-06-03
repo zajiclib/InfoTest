@@ -35,13 +35,14 @@ public class MainActivity extends AppCompatActivity {
 
         generated = new HelpScreen(MainActivity.this, helpLayout);
         generated.addViewsToInfoScreen(button, "Budliky, budliky");
-        generated.addViewsToInfoScreen(button1, "cukrfliky");
+//        generated.addViewsToInfoScreen(button1, "cukrfliky");
         //generated.addViewsToInfoScreen(tv, "neco");
 
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                generated.displayAllHelp();
+//                generated.displayAllHelp();
+                generated.displayHelp();
             }
         });
     }

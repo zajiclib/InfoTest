@@ -140,6 +140,7 @@ public class HelpScreen implements View.OnClickListener {
             boolean isMiddle = isInMiddle(currentViewToAnnotate);
 
             ImageView iv = new ImageView(context);
+            iv.setAdjustViewBounds(true);
             iv.requestLayout();
             TextView tv = new TextView(context);
             tv.setTextColor(Color.WHITE);
@@ -169,6 +170,7 @@ public class HelpScreen implements View.OnClickListener {
 
             helpLayout.addView(iv, paramsArrow);
 
+            helpLayout.setVisibility(View.VISIBLE);
         }
     }
 
