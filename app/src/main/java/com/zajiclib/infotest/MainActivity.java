@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button button, button2;
     ConstraintLayout rootLayout;
-    RelativeLayout helpLayout;
+    ConstraintLayout helpLayout;
     TextView tv;
 
     HelpScreen generated;

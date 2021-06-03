@@ -6,30 +6,30 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class HelpScreen implements View.OnClickListener {
 
-    private final RelativeLayout helpLayout;
+    private final ConstraintLayout helpLayout;
     private final Context context;
     private final List<View> viewsToShowHelp;
     private final List<String> helpMessages;
-    private boolean displayAllTogether;
-    private int currentlyDisplayedIndex;
     private static final double ADJUST_RATIO = 1.6;
 
     private int displayWidth, displayHeight;
 
-    public HelpScreen(@NonNull Context context, RelativeLayout helpLayout) {
+    public HelpScreen(@NonNull Context context, ConstraintLayout helpLayout) {
         this.helpLayout = helpLayout;
         this.context = context;
         this.viewsToShowHelp = new ArrayList<>();
@@ -39,7 +39,7 @@ public class HelpScreen implements View.OnClickListener {
         ((MainActivity) context).getWindowManager().getDefaultDisplay().getSize(screenSizePoint);
         this.displayWidth = screenSizePoint.x;
         this.displayHeight = screenSizePoint.y;
-        this.currentlyDisplayedIndex = 0;
+        this.helpLayout.setElevation(15);
         this.helpLayout.setFocusable(View.FOCUSABLE);
         this.helpLayout.setClickable(true);
 //        DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -65,9 +65,11 @@ public class HelpScreen implements View.OnClickListener {
             boolean isBottom = isOnBottomSide(currentViewToAnnotate);
 
             ImageView iv = new ImageView(context);
+            iv.setMaxWidth(currentViewToAnnotate.getWidth());
+            iv.setMaxHeight(currentViewToAnnotate.getHeight());
             iv.setAdjustViewBounds(true);
-//            iv.setBackgroundColor(Color.RED);
-            iv.requestLayout();
+            iv.setId(View.generateViewId());
+            iv.setBackgroundColor(Color.RED);
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.arrow_down);
             iv.setImageDrawable(drawable);
 
@@ -75,36 +77,36 @@ public class HelpScreen implements View.OnClickListener {
             if (!isBottom) iv.setScaleY(-1.0f);
 
             // arrow params
-            RelativeLayout.LayoutParams paramsArrow = new RelativeLayout.LayoutParams((int) (currentViewToAnnotate.getWidth()), (int) (currentViewToAnnotate.getHeight()));
+            ConstraintSet newSet = new ConstraintSet();
+            int leftMargin = computeLeftMargin(currentViewToAnnotate);
+            int topMargin = computeTopMargin(currentViewToAnnotate);
 
-            paramsArrow.leftMargin = computeLeftMargin(currentViewToAnnotate);
-            paramsArrow.topMargin = computeTopMargin(currentViewToAnnotate);
+            helpLayout.addView(iv, 0);
+            newSet.clone(helpLayout);
 
-            helpLayout.addView(iv, paramsArrow);
+            newSet.connect(iv.getId(), ConstraintSet.TOP, helpLayout.getId(), ConstraintSet.TOP, topMargin);
+            newSet.connect(iv.getId(),ConstraintSet.START, helpLayout.getId(), ConstraintSet.START, leftMargin);
+            newSet.applyTo(helpLayout);
 
 
-            // setting up the annotation text view
-            TextView tv = new TextView(context);
-            tv.setTextColor(Color.WHITE);
-            tv.setText(helpMessages.get(i));
-            tv.requestLayout();
 
-            RelativeLayout.LayoutParams paramsTv = new RelativeLayout.LayoutParams((int) currentViewToAnnotate.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT);
 
-            paramsTv.leftMargin = computeLeftMargin(currentViewToAnnotate);
-            paramsTv.topMargin = computeTopMargin(currentViewToAnnotate, tv,  true);
-
-            helpLayout.addView(tv, paramsTv);
 
             helpLayout.setVisibility(View.VISIBLE);
         }
+    }
+
+    public boolean isOnRightSide(@NonNull View view) {
+        int centerX = (int) view.getX() + view.getWidth() / 2;
+
+        return centerX >= displayWidth / 2;
     }
 
     /**
      * Checks whether is the view on the bottom (half) side of the screen
      */
     public boolean isOnBottomSide(@NonNull View view) {
-        int centerY = (int) view.getY() + view.getWidth() / 2;
+        int centerY = (int) view.getY() + view.getHeight() / 2;
 
         return centerY >= displayHeight / 2;
     }
@@ -116,6 +118,10 @@ public class HelpScreen implements View.OnClickListener {
         return (int) view.getX();
     }
 
+    public int computeRightMargin(View view) {
+        return (int) view.getX() + view.getWidth();
+    }
+
     /**
      * Computes top margin for the arrow
      */
@@ -123,7 +129,7 @@ public class HelpScreen implements View.OnClickListener {
         boolean isBottom = isOnBottomSide(view);
 
         if (isBottom) {
-            return (int) view.getY() - view.getHeight();
+            return (int) view.getY();
         }
 
         return (int) view.getY() + view.getHeight();
@@ -138,7 +144,7 @@ public class HelpScreen implements View.OnClickListener {
         boolean isBottom = isOnBottomSide(view);
 
         if (isBottom) {
-            return (int) (view.getY() - ADJUST_RATIO * view.getHeight());
+            return (int) (view.getY() - view.getHeight());
         }
 
         return (int) (view.getY() + 2 * view.getHeight());
