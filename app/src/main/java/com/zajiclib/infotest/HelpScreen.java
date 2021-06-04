@@ -1,11 +1,14 @@
 package com.zajiclib.infotest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,6 +32,12 @@ public class HelpScreen implements View.OnClickListener {
 
     private int displayWidth, displayHeight;
 
+    /**
+     * Making sure
+     *
+     * @param context
+     * @param helpLayout
+     */
     public HelpScreen(@NonNull Context context, ConstraintLayout helpLayout) {
         this.helpLayout = helpLayout;
         this.context = context;
@@ -36,21 +45,30 @@ public class HelpScreen implements View.OnClickListener {
         this.helpMessages = new ArrayList<>();
         this.helpLayout.setOnClickListener(this);
         Point screenSizePoint = new Point();
-        ((MainActivity) context).getWindowManager().getDefaultDisplay().getSize(screenSizePoint);
+        ((Activity) context).getWindowManager().getDefaultDisplay().getSize(screenSizePoint);
         this.displayWidth = screenSizePoint.x;
         this.displayHeight = screenSizePoint.y;
         this.helpLayout.setElevation(15);
         this.helpLayout.setFocusable(View.FOCUSABLE);
         this.helpLayout.setClickable(true);
-//        DisplayMetrics displayMetrics = new DisplayMetrics();
-//        this.context.getDisplay().getRealMetrics(displayMetrics);
-//        this.displayWidth = displayMetrics.heightPixels;
-//        this.displayHeight = displayMetrics.widthPixels;
     }
 
     public void addViewsToInfoScreen(View view, String textToDisplayAsHelp) {
         this.viewsToShowHelp.add(view);
         this.helpMessages.add(textToDisplayAsHelp);
+    }
+
+    /**
+     * Adding annotation to some point on the screen
+     * @param point Point data type (x, y)
+     * @param textToDisplayAsHelp
+     */
+    public void addViewsToInfoScreen(Point point, String textToDisplayAsHelp) {
+        View view = new View(context);
+        view.setX(point.x);
+        view.setY(point.y);
+        view.setLayoutParams(new ViewGroup.LayoutParams(0,0));
+        addViewsToInfoScreen(view, textToDisplayAsHelp);
     }
 
 
@@ -59,40 +77,59 @@ public class HelpScreen implements View.OnClickListener {
      */
     public void displayHelp() {
         for (int i = 0; i < viewsToShowHelp.size(); i++) {
-
             // retrieving view to annotate
             View currentViewToAnnotate = viewsToShowHelp.get(i);
             boolean isBottom = isOnBottomSide(currentViewToAnnotate);
 
+            TextView tv = new TextView(context);
+            tv.setId(View.generateViewId());
+            tv.setTextColor(Color.WHITE);
+            tv.setText(helpMessages.get(i));
+            helpLayout.addView(tv, 0);
+            tv.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
             ImageView iv = new ImageView(context);
             iv.setMaxWidth(currentViewToAnnotate.getWidth());
-            iv.setMaxHeight(currentViewToAnnotate.getHeight());
+            iv.setMaxHeight(currentViewToAnnotate.getHeight()*2);
             iv.setAdjustViewBounds(true);
             iv.setId(View.generateViewId());
-            iv.setBackgroundColor(Color.RED);
+//            iv.setBackgroundColor(Color.RED);
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.arrow_down);
             iv.setImageDrawable(drawable);
+            iv.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 
             // flip vertically
             if (!isBottom) iv.setScaleY(-1.0f);
 
             // arrow params
             ConstraintSet newSet = new ConstraintSet();
-            int leftMargin = computeLeftMargin(currentViewToAnnotate);
-            int topMargin = computeTopMargin(currentViewToAnnotate);
+            iv.requestLayout();
+            int leftMargin = computeLeftMargin(currentViewToAnnotate, iv) - iv.getMeasuredWidth()/2;
+            int topMargin = computeTopMargin(currentViewToAnnotate) - iv.getMeasuredHeight()/2;
 
-            helpLayout.addView(iv, 0);
+
+            helpLayout.addView(iv, 1);
             newSet.clone(helpLayout);
 
             newSet.connect(iv.getId(), ConstraintSet.TOP, helpLayout.getId(), ConstraintSet.TOP, topMargin);
             newSet.connect(iv.getId(),ConstraintSet.START, helpLayout.getId(), ConstraintSet.START, leftMargin);
             newSet.applyTo(helpLayout);
 
+            newSet = new ConstraintSet();
 
+            newSet.clone(helpLayout);
 
+            newSet.connect(tv.getId(), ConstraintSet.START, iv.getId(), ConstraintSet.START);
+            newSet.connect(tv.getId(), ConstraintSet.END, iv.getId(), ConstraintSet.END);
+            newSet.connect(tv.getId(), ConstraintSet.BOTTOM, iv.getId(), ConstraintSet.TOP);
 
+            newSet.applyTo(helpLayout);
+
+//            Log.d("TAG", "displayHelp: " + tv.getMeasuredHeight() + " " + iv.getMeasuredHeight());
 
             helpLayout.setVisibility(View.VISIBLE);
+
+//            Log.d("TAG", "displayHelp: " + tv.getX() + " " + iv.getX());
         }
     }
 
@@ -114,8 +151,8 @@ public class HelpScreen implements View.OnClickListener {
     /**
      * Computes left margin for the arrow
      */
-    public int computeLeftMargin(View view) {
-        return (int) view.getX();
+    public int computeLeftMargin(View view, ImageView iv) {
+        return (int) (view.getX() + view.getWidth() / 2) - (iv.getWidth()/2);
     }
 
     public int computeRightMargin(View view) {
