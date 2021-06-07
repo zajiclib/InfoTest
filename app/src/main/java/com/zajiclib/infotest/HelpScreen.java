@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -76,6 +77,8 @@ public class HelpScreen implements View.OnClickListener {
      * Method for displaying help in appropriate form
      */
     public void displayHelp() {
+        int index = 0;
+
         for (int i = 0; i < viewsToShowHelp.size(); i++) {
             // retrieving view to annotate
             View currentViewToAnnotate = viewsToShowHelp.get(i);
@@ -85,7 +88,8 @@ public class HelpScreen implements View.OnClickListener {
             tv.setId(View.generateViewId());
             tv.setTextColor(Color.WHITE);
             tv.setText(helpMessages.get(i));
-            helpLayout.addView(tv, 0);
+            helpLayout.addView(tv, index);
+            index++;
             tv.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 
             ImageView iv = new ImageView(context);
@@ -105,32 +109,59 @@ public class HelpScreen implements View.OnClickListener {
             ConstraintSet newSet = new ConstraintSet();
             iv.requestLayout();
             int leftMargin = computeLeftMargin(currentViewToAnnotate, iv) - iv.getMeasuredWidth()/2;
-            int topMargin = computeTopMargin(currentViewToAnnotate) - iv.getMeasuredHeight()/2;
+            int topMargin;
+            if (isBottom) {
+                topMargin = computeTopMargin(currentViewToAnnotate) - iv.getMeasuredHeight();
+            } else {
+                topMargin = computeTopMargin(currentViewToAnnotate);
+            }
 
-
-            helpLayout.addView(iv, 1);
+            helpLayout.addView(iv, index);
+            index++;
             newSet.clone(helpLayout);
 
             newSet.connect(iv.getId(), ConstraintSet.TOP, helpLayout.getId(), ConstraintSet.TOP, topMargin);
-            newSet.connect(iv.getId(),ConstraintSet.START, helpLayout.getId(), ConstraintSet.START, leftMargin);
+            newSet.connect(iv.getId(), ConstraintSet.START, helpLayout.getId(), ConstraintSet.START, leftMargin);
             newSet.applyTo(helpLayout);
 
             newSet = new ConstraintSet();
 
             newSet.clone(helpLayout);
 
+            tv.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            // if the view is on the bottom half
+            if (isBottom) {
+                newSet.connect(tv.getId(), ConstraintSet.BOTTOM, iv.getId(), ConstraintSet.TOP);
+            } else {
+                newSet.connect(tv.getId(), ConstraintSet.TOP, iv.getId(), ConstraintSet.BOTTOM);
+            }
+
             newSet.connect(tv.getId(), ConstraintSet.START, iv.getId(), ConstraintSet.START);
             newSet.connect(tv.getId(), ConstraintSet.END, iv.getId(), ConstraintSet.END);
-            newSet.connect(tv.getId(), ConstraintSet.BOTTOM, iv.getId(), ConstraintSet.TOP);
 
             newSet.applyTo(helpLayout);
+            int maxWidth;
+            if (isOnRightSide(currentViewToAnnotate)) {
+                maxWidth = (int) (displayWidth - currentViewToAnnotate.getX());
+            } else {
+                maxWidth = (int) currentViewToAnnotate.getX() + currentViewToAnnotate.getWidth() / 2;
+            }
 
-//            Log.d("TAG", "displayHelp: " + tv.getMeasuredHeight() + " " + iv.getMeasuredHeight());
+            tv.setMaxWidth(maxWidth);
+            tv.setGravity(Gravity.CENTER_HORIZONTAL);
 
-            helpLayout.setVisibility(View.VISIBLE);
-
-//            Log.d("TAG", "displayHelp: " + tv.getX() + " " + iv.getX());
         }
+
+        // finally view the layout
+        helpLayout.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * make helpscreen invisible
+     */
+    public void concealHelpScreen() {
+        this.helpLayout.setVisibility(View.GONE);
     }
 
     public boolean isOnRightSide(@NonNull View view) {
@@ -165,26 +196,25 @@ public class HelpScreen implements View.OnClickListener {
     public int computeTopMargin(View view) {
         boolean isBottom = isOnBottomSide(view);
 
+        int y = (int) view.getY();
+        int height = view.getMeasuredHeight();
+        int result = 0;
+
         if (isBottom) {
-            return (int) view.getY();
+            result = y;
+        } else {
+            result =  (int) y + height;
         }
 
-        return (int) view.getY() + view.getHeight();
+        return result;
     }
 
     /**
-     * Computes top margin for the textview
+     * Check whether is the help screen visible
+     * @return boolean value if the help layout s visible
      */
-    public int computeTopMargin(View view, TextView textView, boolean isForTextView) {
-        if (!isForTextView) return computeTopMargin(view);
-
-        boolean isBottom = isOnBottomSide(view);
-
-        if (isBottom) {
-            return (int) (view.getY() - view.getHeight());
-        }
-
-        return (int) (view.getY() + 2 * view.getHeight());
+    public boolean isHelpScreenVisible() {
+        return this.helpLayout.getVisibility() == View.VISIBLE;
     }
 
     /**
