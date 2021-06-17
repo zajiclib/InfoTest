@@ -35,23 +35,25 @@ public class MainActivity extends AppCompatActivity {
         helpLayout = findViewById(R.id.help_layout);
         helpLayout.setVisibility(View.GONE);
 
-        generated = new HelpScreen(MainActivity.this, helpLayout);
-        generated.addViewsToInfoScreen(button, "Budliky, budliky");
-        generated.addViewsToInfoScreen(button2, "Click here to display layout annotations");
-        generated.addViewsToInfoScreen(btn, "testing the text length and right top margin");
-        generated.addViewsToInfoScreen(tv, "hello word annotation");
-        generated.addViewsToInfoScreen(b, "test button 3 bottom side");
-
+        generated = new HelpScreen(MainActivity.this, helpLayout, false);
 
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                generated.displayAllHelp();
-                if (!generated.isHelpScreenVisible()) {
-                    generated.displayHelp();
-                } else {
-                    generated.concealHelpScreen();
+////                generated.displayAllHelp();
+//                if (!generated.isHelpScreenVisible()) {
+//                    generated.displayHelp();
+//                } else {
+//                    generated.concealHelpScreen();
+//                }
+                if (generated != null) {
+                    if (!generated.isHelpScreenVisible()) {
+                        generated.show();
+                    } else {
+                        generated.resetHelpScreen();
+                    }
                 }
+
             }
         });
     }
