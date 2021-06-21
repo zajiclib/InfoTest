@@ -3,67 +3,28 @@ package com.zajiclib.infotest;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
-import android.widget.RelativeLayout;
+
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 public class MainActivity extends AppCompatActivity {
 
-
-    Button button, button2;
-    ConstraintLayout rootLayout;
-    ConstraintLayout helpLayout;
-    TextView tv;
-
     HelpScreen generated;
-
+    Button btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        button = findViewById(R.id.button);
-        button2 = findViewById(R.id.button2);
-        tv = findViewById(R.id.textView);
-        rootLayout = findViewById(R.id.root_layout);
+        btn = findViewById(R.id.button);
 
-        Button btn = findViewById(R.id.btntry);
-        Button b = findViewById(R.id.button3);
-        helpLayout = findViewById(R.id.help_layout);
-        helpLayout.setVisibility(View.GONE);
+        btn.setOnClickListener((v -> Toast.makeText(this, "budliky", Toast.LENGTH_SHORT).show()));
 
-        generated = new HelpScreen(MainActivity.this, helpLayout, false);
-
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-////                generated.displayAllHelp();
-//                if (!generated.isHelpScreenVisible()) {
-//                    generated.displayHelp();
-//                } else {
-//                    generated.concealHelpScreen();
-//                }
-                if (generated != null) {
-                    if (!generated.isHelpScreenVisible()) {
-                        generated.show();
-                    } else {
-                        generated.resetHelpScreen();
-                    }
-                }
-
-            }
-        });
-    }
-
-
-
-    public void test() {
 
     }
-
-
-
 }
